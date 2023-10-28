@@ -1,33 +1,42 @@
 #!/usr/bin/python3
-"""
-Factorize numbers in a file into a product of two prime numbers
-"""
 import sys
 
+def gcd(a, b):
+    while b:
+        a, b = b, a % b
+    return a
 
-def factorize():
-    """
-    A function to search file and factorize the given set of numbers into two prime numbers (format n = p*q)
-    """
-    try:
-        file = sys.argv[1]
-        with open(file) as f:
-            for line_number in f:
-                line_number = int(line_number)
-                if line_number % 2 == 0:
-                        print("{}={}*{}".format(line_number, line_number // 2, 2))
-                        continue
-                i = 3
-                while i < line_number // 2:
-                    if line_number % i == 0:
-                        print("{}={}*{}".format(line_number, line_number // i, i))
-                        break
-                    i = i + 2
-                if i == (line_number // 2) + 1:
-                    print("{}={}*{}".format(line_number, line_number, 1))
-    except (IndexError):
-        pass
+def pollards_rho(n):
+    x, y, d = 2, 2, 1
+    f = lambda x: (x**2 + 1) % n
 
+    while d == 1:
+        x = f(x)
+        y = f(f(y))
+        d = gcd(abs(x - y), n)
 
-factorize()
+    if d == n:
+        return None  # Pollard's Rho failed
+    else:
+        return d
+
+# Check if a command-line argument is provided
+if len(sys.argv) < 2:
+    print("Usage: python rsa.py <input_file>")
+    sys.exit(1)
+
+# Read the number from the provided file
+input_file = sys.argv[1]
+
+with open(input_file, 'r') as file:
+    n = int(file.read().strip())
+
+factor = pollards_rho(n)
+
+if factor is not None:
+    p = factor
+    q = n // p
+    print(f"{n}={p}*{q}")
+else:
+    print("Failed to factor n")
 
