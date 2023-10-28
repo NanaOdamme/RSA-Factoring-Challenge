@@ -1,13 +1,26 @@
 #include <stdio.h>
+#include <inttypes.h>
+#include <time.h>
 
-void factorize(int n) {
-    for (int i = 2; i <= n / 2; i++) {
-        if (n % i == 0) {
-            printf("%d=%d*%d\n", n, i, n / i);
+void factorize(uint64_t n) {
+    uint64_t p = 2;
+
+    printf("%" PRIu64 "=", n);
+
+    while (p * p <= n) {
+        if (n % p == 0) {
+            uint64_t q = n / p;
+            if (p <= q) {
+                printf("%" PRIu64 "*%" PRIu64 "\n", p, q);
+            } else {
+                printf("%" PRIu64 "*%" PRIu64 "\n", q, p);
+            }
             return;
         }
+        p++;
     }
-    printf("%d=%d*%d\n", n, 1, n);
+
+    printf("%" PRIu64 " * %d\n", n, 1);
 }
 
 int main(int argc, char *argv[]) {
@@ -22,9 +35,17 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    int number;
-    while (fscanf(file, "%d", &number) == 1) {
+    uint64_t number;
+    while (fscanf(file, "%" SCNu64, &number) == 1) {
+        clock_t start_time = clock();
         factorize(number);
+        clock_t end_time = clock();
+        double elapsed_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+
+        if (elapsed_time >= 1.0) {
+            printf("Time limit exceeded for input %" PRIu64 "\n", number);
+            break;
+        }
     }
 
     fclose(file);
